@@ -458,18 +458,37 @@ def check_card():
         
         response = r.post(url, data=payload, headers=headers)
     
+    # Extract error message from the specific div structure
     soup = BeautifulSoup(response.text, 'html.parser')
-    error_element = soup.find('ul', class_='woocommerce-error')
     error_message = None
-    if error_element:
-        li_items = error_element.find_all('li')
-        for li in li_items:
-            text = li.text.strip()
-            if 'Status code' in text or 'error' in text.lower():
-                error_message = text
-                break
-        if not error_message and li_items:
-            error_message = li_items[0].text.strip()
+    
+    # Try to find error in the specific div structure
+    error_div = soup.find('div', class_='rh-message woocommerce-error')
+    if error_div:
+        p_tag = error_div.find('p', class_='text-primary')
+        if p_tag:
+            error_message = p_tag.text.strip()
+    
+    # If not found, try the older woocommerce-error ul structure
+    if not error_message:
+        error_element = soup.find('ul', class_='woocommerce-error')
+        if error_element:
+            li_items = error_element.find_all('li')
+            for li in li_items:
+                text = li.text.strip()
+                if 'Status code' in text or 'error' in text.lower():
+                    error_message = text
+                    break
+            if not error_message and li_items:
+                error_message = li_items[0].text.strip()
+    
+    # If still not found, try to find any error class
+    if not error_message:
+        error_div = soup.find('div', class_='woocommerce-notices-wrapper')
+        if error_div:
+            error_p = error_div.find('p')
+            if error_p:
+                error_message = error_p.text.strip()
     
     if re.search(r'Avs', response.text) or re.search(r'avs', response.text):
         result = "Approved-1000 ✅"
@@ -484,7 +503,7 @@ def check_card():
     elif error_message:
         result = f"Declined: {error_message}"
     else:
-        result = "Approved-1000 ✅"
+        result = "Unknown error"
     
     return jsonify({
         'result': result,
