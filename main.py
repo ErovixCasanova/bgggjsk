@@ -494,6 +494,8 @@ def check_card():
         result = "Approved-1000 ✅"
     elif re.search(r'Nice', response.text):
         result = "Approved-1000 ✅"
+    elif re.search(r'Duplicate card exist', response.text):
+        result = "Approved-1000 ✅"        
     elif re.search(r'Added', response.text):
         result = "Approved-1000 ✅"
     elif re.search(r'Successfully', response.text):
