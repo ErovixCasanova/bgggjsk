@@ -459,17 +459,32 @@ def check_card():
         response = r.post(url, data=payload, headers=headers)
     
     soup = BeautifulSoup(response.text, 'html.parser')
-    error_element = soup.find('p', class_='text-primary')
-    error_message = error_element.text.strip() if error_element else None
+    error_element = soup.find('ul', class_='woocommerce-error')
+    error_message = None
+    if error_element:
+        li_items = error_element.find_all('li')
+        for li in li_items:
+            text = li.text.strip()
+            if 'Status code' in text or 'error' in text.lower():
+                error_message = text
+                break
+        if not error_message and li_items:
+            error_message = li_items[0].text.strip()
     
-    response_text_lower = response.text.lower()
-    
-    if re.search(r'avs', response_text_lower) or re.search(r'nice', response_text_lower) or re.search(r'added', response_text_lower) or re.search(r'successfully', response_text_lower):
-        result = "Approved ✅"
+    if re.search(r'Avs', response.text) or re.search(r'avs', response.text):
+        result = "Approved-1000 ✅"
+    elif re.search(r'Nice', response.text):
+        result = "Approved-1000 ✅"
+    elif re.search(r'Added', response.text):
+        result = "Approved-1000 ✅"
+    elif re.search(r'Successfully', response.text):
+        result = "Approved-1000 ✅"
+    elif error_message and 'Status code' in error_message:
+        result = f"Declined: {error_message}"
     elif error_message:
-        result = f"Declined ❌: {error_message}"
+        result = f"Declined: {error_message}"
     else:
-        result = "Declined ❌: Unknown error"
+        result = "Unknown error"
     
     return jsonify({
         'result': result,
